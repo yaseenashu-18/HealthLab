@@ -7,14 +7,14 @@ export const connectDB = async (): Promise<boolean> => {
   try {
     mongoose.set('strictQuery', true);
     await mongoose.connect(ENV.MONGODB_URI, {
-      serverSelectionTimeoutMS: 2500, // Quick timeout for seamless fallback if mongo isn't running locally
+      serverSelectionTimeoutMS: 10000,
     });
     isMongoConnected = true;
-    console.log('✅ Connected to MongoDB Database successfully.');
+    console.log('✅ Connected to MongoDB Atlas Database successfully.');
     return true;
-  } catch (error) {
+  } catch (error: any) {
     isMongoConnected = false;
-    console.warn('⚠️  MongoDB connection unavailable. Activating HealthLab AI In-Memory Database Fallback for seamless authentication execution.');
+    console.warn(`⚠️  MongoDB connection warning: ${error?.message || 'Connection timeout'}. Activating HealthLab AI In-Memory Fallback.`);
     return false;
   }
 };
