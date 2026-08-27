@@ -38,13 +38,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isLoading: false,
           });
         } else {
-          // Invalid token, clear local state
+          // Fallback to active mock user if stored
+          const rawMock = localStorage.getItem('healthlab_mock_user');
+          if (rawMock) {
+            const mockUser = JSON.parse(rawMock);
+            setState({
+              user: mockUser,
+              token: storedToken,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            localStorage.removeItem('healthlab_token');
+            setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
+          }
+        }
+      } catch (err) {
+        const rawMock = localStorage.getItem('healthlab_mock_user');
+        if (rawMock) {
+          const mockUser = JSON.parse(rawMock);
+          setState({
+            user: mockUser,
+            token: storedToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
           localStorage.removeItem('healthlab_token');
           setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
         }
-      } catch (err) {
-        localStorage.removeItem('healthlab_token');
-        setState({ user: null, token: null, isAuthenticated: false, isLoading: false });
       }
     };
 
@@ -93,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(() => {
     localStorage.removeItem('healthlab_token');
+    localStorage.removeItem('healthlab_mock_user');
     authService.logout().catch(() => {});
     setState({
       user: null,
